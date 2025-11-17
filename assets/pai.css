@@ -1,0 +1,215 @@
+.pais {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 58px;
+    margin-bottom: 10px;
+    align-items: end;
+}
+.pai {
+    width: 40px;
+    height: 58px;
+    background-size: cover;
+}
+
+/* 手牌 */
+.hand {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 30px;
+}
+.hand.active > .pai:last-child {
+    margin-left: 10px;
+}
+
+/* 捨牌 */
+.called {
+    opacity: 0.5;
+}
+.riichi {
+    margin: 9px 9px -9px;
+    rotate: 90deg;
+}
+
+/* ポン・カン・チー */
+.open {
+    display: flex;
+    margin-left: 10px;
+}
+.PON.left > .pai:first-child,
+.PON.center > .pai:nth-child(2),
+.PON.right > .pai:last-child {
+    margin: 9px 9px -9px;
+    rotate: 90deg;
+}
+
+.KAN.left > .pai:nth-child(1),
+.KAN.center > .pai:nth-child(2),
+.KAN.right > .pai:nth-child(4),
+.KAKAN.left > .pai:nth-child(1),
+.KAKAN.center > .pai:nth-child(2),
+.KAKAN.right > .pai:nth-child(3) {
+    margin: 9px 9px -9px;
+    rotate: 90deg;
+}
+.KAKAN.left > .pai:nth-child(2),
+.KAKAN.center > .pai:nth-child(3),
+.KAKAN.right > .pai:nth-child(4) {
+    margin: -31px 9px -9px -49px;
+    rotate: 90deg;
+}
+.CHII > .pai:first-child {
+    margin: 9px 9px -9px;
+    rotate: 90deg;
+}
+.ANKAN > .pai:first-child,
+.ANKAN > .pai:last-child {
+    background-image: url(B.png);
+}
+
+/* 裏名 */
+.back {
+    background-image: url(B.png);
+}
+/* 萬子 */
+.M1 {
+    background-image: url(M.png);
+    background-position: 0 0;
+}
+.M2 {
+    background-image: url(M.png);
+    background-position: 12.5% 0;
+}
+.M3 {
+    background-image: url(M.png);
+    background-position: 25% 0;
+}
+.M4 {
+    background-image: url(M.png);
+    background-position: 37.5% 0;
+}
+.M5 {
+    background-image: url(M.png);
+    background-position: 50% 0;
+}
+.M6 {
+    background-image: url(M.png);
+    background-position: 62.5% 0;
+}
+.M7 {
+    background-image: url(M.png);
+    background-position: 75% 0;
+}
+.M8 {
+    background-image: url(M.png);
+    background-position: 87.5% 0;
+}
+.M9 {
+    background-image: url(M.png);
+    background-position: 100% 0;
+}
+
+/* 筒子 */
+.P1 {
+    background-image: url(P.png);
+    background-position: 0 0;
+}
+.P2 {
+    background-image: url(P.png);
+    background-position: 12.5% 0;
+}
+.P3 {
+    background-image: url(P.png);
+    background-position: 25% 0;
+}
+.P4 {
+    background-image: url(P.png);
+    background-position: 37.5% 0;
+}
+.P5 {
+    background-image: url(P.png);
+    background-position: 50% 0;
+}
+.P6 {
+    background-image: url(P.png);
+    background-position: 62.5% 0;
+}
+.P7 {
+    background-image: url(P.png);
+    background-position: 75% 0;
+}
+.P8 {
+    background-image: url(P.png);
+    background-position: 87.5% 0;
+}
+.P9 {
+    background-image: url(P.png);
+    background-position: 100% 0;
+}
+
+/* 索子 */
+.S1 {
+    background-image: url(S.png);
+    background-position: 0 0;
+}
+.S2 {
+    background-image: url(S.png);
+    background-position: 12.5% 0;
+}
+.S3 {
+    background-image: url(S.png);
+    background-position: 25% 0;
+}
+.S4 {
+    background-image: url(S.png);
+    background-position: 37.5% 0;
+}
+.S5 {
+    background-image: url(S.png);
+    background-position: 50% 0;
+}
+.S6 {
+    background-image: url(S.png);
+    background-position: 62.5% 0;
+}
+.S7 {
+    background-image: url(S.png);
+    background-position: 75% 0;
+}
+.S8 {
+    background-image: url(S.png);
+    background-position: 87.5% 0;
+}
+.S9 {
+    background-image: url(S.png);
+    background-position: 100% 0;
+}
+
+/* 字牌 */
+.Z1 {
+    background-image: url(Z1.png);
+    background-position: 0 0;
+}
+.Z2 {
+    background-image: url(Z1.png);
+    background-position: 33.33% 0;
+}
+.Z3 {
+    background-image: url(Z1.png);
+    background-position: 66.67% 0;
+}
+.Z4 {
+    background-image: url(Z1.png);
+    background-position: 100% 0;
+}
+.Z5 {
+    background-image: url(Z2.png);
+    background-position: 0% 0;
+}
+.Z6 {
+    background-image: url(Z2.png);
+    background-position: 50% 0;
+}
+.Z7 {
+    background-image: url(Z2.png);
+    background-position: 100% 0;
+}

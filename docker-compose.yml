@@ -1,0 +1,16 @@
+version: "3"
+services:
+    apache:
+        build:
+            context: ./docker
+        platform: linux/amd64
+        image: "mj-web"
+        container_name: "mj-web"
+        ports:
+            - "80:80"
+        tty: true
+        stdin_open: true
+        volumes:
+            - ./:/var/www/html:delegated
+        working_dir: /var/www/html
+        privileged: true

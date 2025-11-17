@@ -1,0 +1,9 @@
+{
+    "name": "ad5jp/mahjong-for-generative-ai",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "require": {}
+}
