@@ -15,7 +15,9 @@ class Player
     /**
      * @var Pai[]
      */
-    public array $hand = []; // 手牌（最後がツモ牌）
+    public array $hand = []; // 手牌
+
+    public Pai|null $drawing = null; // ツモ牌
 
     /**
      * @var OpenPais[]
@@ -36,8 +38,19 @@ class Player
         $this->name = $name;
     }
 
+    public function draw(Pai $pai)
+    {
+        $this->drawing = $pai;
+    }
+
     public function discard(Pai $target, bool $riichi): void
     {
+        // ツモ牌があれば手牌に統合
+        if ($this->drawing) {
+            $this->hand[] = $this->drawing;
+            $this->drawing = null;
+        }
+
         $index = array_search($target->value, array_map(fn (Pai $pai) => $pai->value, $this->hand));
 
         if ($index === false || $this->riichi) {
@@ -60,6 +73,12 @@ class Player
 
     public function ankan(Pai $target_pai): void
     {
+        // ツモ牌があれば手牌に統合
+        if ($this->drawing) {
+            $this->hand[] = $this->drawing;
+            $this->drawing = null;
+        }
+
         // 手牌に4枚あるか確認
         $same = array_filter($this->hand, fn (Pai $pai) => $pai === $target_pai);
         if (count($same) !== 4) {
@@ -74,6 +93,20 @@ class Player
         $open->type = OpenType::ANKAN;
         $open->pais = array_fill(0, 4, $target_pai);
         $this->open[] = $open;
+    }
+
+    public function kakan(Pai $target_pai): void
+    {
+        // ポンしてるか確認
+        $pon = array_find($this->open, fn (OpenPais $open) => $open->type === OpenType::PON && $open->pais[0] === $target_pai);
+        if ($pon === null) {
+            throw new Exception('ポンしていないので、加槓できません');
+        }
+
+        // ポンにツモ牌を加えてカンにする
+        $pon->type = OpenType::KAKAN;
+        $pon->pais[] = $this->drawing;
+        $this->drawing = null;
     }
 
     public function sortHand()

@@ -23,7 +23,7 @@ class Game
 
     public int $state = 0; // プレイ状態 (0:対局準備中 1:捨て待ち 2:鳴き待ち 3:終局)
 
-    public int $kan_state = 0; // カン状態 (0:なし 1:捨てたらめくる)
+    public bool $after_kan = false; // 明槓後か（捨てた後、ドラをめくる）
 
     /**
      * @var Player[]
@@ -128,9 +128,9 @@ class Game
                 $player = $this->currentPlayer();
                 $player->discard($action->target, $action->riichi);
                 // 明槓後ならカンドラをめくる
-                if ($this->kan_state) {
+                if ($this->after_kan) {
                     $this->dora[] = array_shift($this->bed);
-                    $this->kan_state = 0;
+                    $this->after_kan = false;
                 }
                 $this->state = self::STATE_CALL;
             } elseif ($action->command === Action::TSUMO) {
@@ -139,15 +139,15 @@ class Game
             } elseif ($action->command === Action::ANKAN) {
                 $this->currentPlayer()->ankan($action->target);
                 // 嶺上牌をツモる
-                $this->currentPlayer()->hand[] = array_shift($this->bed);
+                $this->currentPlayer()->draw(array_shift($this->bed));
                 // カンドラをめくる
                 $this->dora[] = array_shift($this->bed);
             } elseif ($action->command === Action::KAKAN) {
-                $this->currentPlayer()->ankan($action->target);
+                $this->currentPlayer()->kakan($action->target);
                 // 嶺上牌をツモる
-                $this->currentPlayer()->hand[] = array_shift($this->bed);
+                $this->currentPlayer()->draw(array_shift($this->bed));
                 // カンドラはまだめくらいない
-                $this->kan_state = 1;
+                $this->after_kan = true;
             }
         } elseif ($this->state === self::STATE_CALL) {
             if ($action->command === Action::SKIP) {
@@ -155,7 +155,7 @@ class Game
                 $this->current_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
                 // 山からツモる
                 $player = $this->currentPlayer();
-                $player->hand[] = array_shift($this->deck);
+                $player->draw(array_shift($this->deck));
                 $this->state = self::STATE_DISCARD;
             } elseif ($action->command === Action::PON) {
                 // ポン実行
@@ -169,9 +169,9 @@ class Game
                 // カンしたプレイヤーの手番に
                 $this->current_player = $action->player;
                 // 嶺上牌をツモる
-                $this->currentPlayer()->hand[] = array_shift($this->bed);
+                $this->currentPlayer()->draw(array_shift($this->bed));
                 // カンドラはまだめくらいない
-                $this->kan_state = 1;
+                $this->after_kan = true;
                 $this->state = self::STATE_DISCARD;
             } elseif ($action->command === Action::CHII) {
                 // チー実行
@@ -221,6 +221,8 @@ class Game
 
         // 手配を配る
         foreach ($this->players as $index => $player) {
+            $player->open = [];
+            $player->river = [];
             $player->hand = array_splice($this->deck, 0, ($index === $this->dealer_player ? 14 : 13));
             $player->sortHand();
         }
@@ -395,7 +397,7 @@ class Game
         $action_player = $this->players[$player_index];
 
         // 手牌に加える
-        $action_player->hand[] = $last_river->pai;
+        $action_player->draw($last_river->pai);
     }
 
     public function promptDiscard(): string

@@ -64,10 +64,15 @@ use App\Game;
                 <?php endforeach; ?>
             </div>
             <div class="pais">
-                <div class="hand <?php echo (($i === $game->current_player && $game->state === Game::STATE_DISCARD) ? 'active' : ''); ?>">
+                <div class="hand">
                     <?php foreach ($player->hand as $pai): ?>
                         <?php echo $pai->html(); ?>
                     <?php endforeach; ?>
+                    <?php if ($player->drawing): ?>
+                        <div class="tsumo">
+                            <?php echo $player->drawing->html(); ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <?php foreach ($player->open as $open_pais): ?>
                     <?php echo $open_pais->html(); ?>
