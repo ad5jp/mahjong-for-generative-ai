@@ -405,14 +405,6 @@ class Game
         $prompt = '';
         $prompt .= 'あなたは麻雀の対局中です。状況は以下の通りで、あなたの手番です。手牌を捨てるか、暗槓、加槓、ツモのいずれかを宣言してください。' . "\n";
         $prompt .= "\n";
-        $prompt .= '# 凡例' . "\n";
-        $prompt .= 'M1〜M9:萬子 ' . "\n";
-        $prompt .= 'P1〜P9:筒子 ' . "\n";
-        $prompt .= 'S1〜S9:索子 ' . "\n";
-        $prompt .= 'Z1:東 Z2:南 Z3:西 Z4:北 Z5:白 Z6:発 Z7:中 ' . "\n";
-        $prompt .= '捨牌の*マーク: リーチ宣言牌' . "\n";
-        $prompt .= '捨牌の(): 鳴かれた牌' . "\n";
-        $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
         $prompt .= 'ドラ指示牌: ' . join(' ', array_map(fn (Pai $pai) => $pai->value, $this->dora)) . "\n";
@@ -439,7 +431,7 @@ class Game
         $prompt .= '```' . "\n";
         $prompt .= '{' . "\n";
         $prompt .= '    "command": "discard",' . "\n";
-        $prompt .= '    "target": "' . $this->currentPlayer()->hand[0]->value . '",' . "\n";
+        $prompt .= '    "target": "' . $this->currentPlayer()->hand[0]->letter() . '",' . "\n";
         $prompt .= '    "riichi": false,' . "\n";
         $prompt .= '    "comment": ""' . "\n";
         $prompt .= '}' . "\n";
@@ -466,14 +458,6 @@ class Game
 
         $prompt = '';
         $prompt .= "あなたは麻雀の対局中です。状況は以下の通りで、{$discard_player_label}が打牌しました。ポン、カン、チー、ロンのいずれかを宣言するか、何もしないかを決めてください。" . "\n";
-        $prompt .= "\n";
-        $prompt .= '# 凡例' . "\n";
-        $prompt .= 'M1〜M9:萬子 ' . "\n";
-        $prompt .= 'P1〜P9:筒子 ' . "\n";
-        $prompt .= 'S1〜S9:索子 ' . "\n";
-        $prompt .= 'Z1:東 Z2:南 Z3:西 Z4:北 Z5:白 Z6:発 Z7:中 ' . "\n";
-        $prompt .= '捨牌の*マーク: リーチ宣言牌' . "\n";
-        $prompt .= '捨牌の(): 鳴かれた牌' . "\n";
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
@@ -502,7 +486,7 @@ class Game
         $prompt .= '{' . "\n";
         $prompt .= '    "player": ' . $player_index . ',' . "\n";
         $prompt .= '    "command": "chii",' . "\n";
-        $prompt .= '    "components": ["M1", "M2"],' . "\n";
+        $prompt .= '    "components": ["1萬", "2萬"],' . "\n";
         $prompt .= '    "comment": ""' . "\n";
         $prompt .= '}' . "\n";
         $prompt .= '```' . "\n";

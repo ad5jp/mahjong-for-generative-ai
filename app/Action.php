@@ -39,7 +39,7 @@ class Action
         $this->command = $attribute['command'] ?? 'none';
 
         if (in_array($this->command, [self::DISCARD, self::ANKAN, self::KAKAN])) {
-            $this->target = isset($attribute['target']) ? Pai::from($attribute['target']) : throw new Exception('parameter target is missing');
+            $this->target = isset($attribute['target']) ? Pai::fromLetter($attribute['target']) : throw new Exception('parameter target is missing');
         }
 
         if ($this->command === self::DISCARD) {
@@ -55,7 +55,7 @@ class Action
                 throw new Exception('parameter components is missing or invalid');
             }
 
-            $this->components = array_map(fn ($value) => Pai::from($value), $attribute['components']);
+            $this->components = array_map(fn ($value) => Pai::fromLetter($value), $attribute['components']);
         }
 
         if ($this->command === self::CALCULATE) {

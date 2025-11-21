@@ -49,4 +49,84 @@ enum Pai: string
     {
         return sprintf('<span class="pai %s"></span>', $this->value);
     }
+
+    public function letter(): string
+    {
+        return match($this) {
+            self::M1 => '1萬',
+            self::M2 => '2萬',
+            self::M3 => '3萬',
+            self::M4 => '4萬',
+            self::M5 => '5萬',
+            self::M6 => '6萬',
+            self::M7 => '7萬',
+            self::M8 => '8萬',
+            self::M9 => '9萬',
+            self::P1 => '1筒',
+            self::P2 => '2筒',
+            self::P3 => '3筒',
+            self::P4 => '4筒',
+            self::P5 => '5筒',
+            self::P6 => '6筒',
+            self::P7 => '7筒',
+            self::P8 => '8筒',
+            self::P9 => '9筒',
+            self::S1 => '1索',
+            self::S2 => '2索',
+            self::S3 => '3索',
+            self::S4 => '4索',
+            self::S5 => '5索',
+            self::S6 => '6索',
+            self::S7 => '7索',
+            self::S8 => '8索',
+            self::S9 => '9索',
+            self::Z1 => '東',
+            self::Z2 => '南',
+            self::Z3 => '西',
+            self::Z4 => '北',
+            self::Z5 => '白',
+            self::Z6 => '発',
+            self::Z7 => '中',
+        };
+    }
+
+    public static function fromLetter(string $letter): self
+    {
+        return match($letter) {
+            '1萬' => self::M1,
+            '2萬' => self::M2,
+            '3萬' => self::M3,
+            '4萬' => self::M4,
+            '5萬' => self::M5,
+            '6萬' => self::M6,
+            '7萬' => self::M7,
+            '8萬' => self::M8,
+            '9萬' => self::M9,
+            '1筒' => self::P1,
+            '2筒' => self::P2,
+            '3筒' => self::P3,
+            '4筒' => self::P4,
+            '5筒' => self::P5,
+            '6筒' => self::P6,
+            '7筒' => self::P7,
+            '8筒' => self::P8,
+            '9筒' => self::P9,
+            '1索' => self::S1,
+            '2索' => self::S2,
+            '3索' => self::S3,
+            '4索' => self::S4,
+            '5索' => self::S5,
+            '6索' => self::S6,
+            '7索' => self::S7,
+            '8索' => self::S8,
+            '9索' => self::S9,
+            '東' => self::Z1,
+            '南' => self::Z2,
+            '西' => self::Z3,
+            '北' => self::Z4,
+            '白' => self::Z5,
+            '発' => self::Z6,
+            '中' => self::Z7,
+        };
+    }
 }

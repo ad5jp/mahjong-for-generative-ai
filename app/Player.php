@@ -116,7 +116,17 @@ class Player
 
     public function showHand()
     {
-        return join(' ', array_map(fn (Pai $pai) => $pai->value, $this->hand));
+        $hand = $this->hand;
+        if ($this->drawing) {
+            $hand[] = $this->drawing;
+            usort($hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
+        }
+        $string = join(' ', array_map(fn (Pai $pai) => $pai->letter(), $hand));
+        if ($this->drawing) {
+            $string .= sprintf(' (ツモ牌: %s)', $this->drawing->letter());
+        }
+
+        return $string;
     }
 
     public function showOpen()
@@ -125,7 +135,7 @@ class Player
             return sprintf(
                 '%s (%s)',
                 $open_pais->type->label(),
-                join(' ', array_map(fn (Pai $pai) => $pai->value, $open_pais->pais)),
+                join(' ', array_map(fn (Pai $pai) => $pai->letter(), $open_pais->pais)),
             );
         }, $this->open));
     }
@@ -133,12 +143,12 @@ class Player
     public function showRiver()
     {
         return join(' ', array_map(function (RiverPai $river_pai) {
-            $str = $river_pai->pai->value;
+            $str = $river_pai->pai->letter();
             if ($river_pai->riichi) {
-                $str .= "*";
+                $str .= "(リーチ)";
             }
             if ($river_pai->called) {
-                $str = "({$str})";
+                $str .= "(鳴)";
             }
 
             return $str;
