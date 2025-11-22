@@ -36,25 +36,25 @@
     display: flex;
     margin-left: 10px;
 }
-.PON.left > .pai:first-child,
-.PON.center > .pai:nth-child(2),
-.PON.right > .pai:last-child {
+.PON.LEFT > .pai:first-child,
+.PON.ACROSS > .pai:nth-child(2),
+.PON.RIGHT > .pai:last-child {
     margin: 9px 9px -9px;
     rotate: 90deg;
 }
 
-.KAN.left > .pai:nth-child(1),
-.KAN.center > .pai:nth-child(2),
-.KAN.right > .pai:nth-child(4),
-.KAKAN.left > .pai:nth-child(1),
-.KAKAN.center > .pai:nth-child(2),
-.KAKAN.right > .pai:nth-child(3) {
+.KAN.LEFT > .pai:nth-child(1),
+.KAN.ACROSS > .pai:nth-child(2),
+.KAN.RIGHT > .pai:nth-child(4),
+.KAKAN.LEFT > .pai:nth-child(1),
+.KAKAN.ACROSS > .pai:nth-child(2),
+.KAKAN.RIGHT > .pai:nth-child(3) {
     margin: 9px 9px -9px;
     rotate: 90deg;
 }
-.KAKAN.left > .pai:nth-child(2),
-.KAKAN.center > .pai:nth-child(3),
-.KAKAN.right > .pai:nth-child(4) {
+.KAKAN.LEFT > .pai:nth-child(2),
+.KAKAN.ACROSS > .pai:nth-child(3),
+.KAKAN.RIGHT > .pai:nth-child(4) {
     margin: -31px 9px -9px -49px;
     rotate: 90deg;
 }

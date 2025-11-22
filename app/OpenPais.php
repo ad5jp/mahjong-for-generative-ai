@@ -13,19 +13,14 @@ class OpenPais
      */
     public array $pais;
 
-    public int|null $from = null; // 1:上家 2:対面 3:下家
+    public OpenFrom|null $from = null;
 
     public function html(): string
     {
         return sprintf(
             '<div class="open %s %s">%s</div>',
             $this->type->value,
-            match ($this->from) {
-                1 => 'left',
-                2 => 'center',
-                3 => 'right',
-                default => '',
-            },
+            $this->from?->value,
             join('', array_map(fn (Pai $pai) => $pai->html(), $this->pais))
         );
     }

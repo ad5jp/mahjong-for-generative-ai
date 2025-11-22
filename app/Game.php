@@ -280,9 +280,9 @@ class Game
         $open->type = OpenType::PON;
         $open->pais = array_fill(0, 3, $last_river->pai);
         $open->from = match ($player_index) {
-            $this->nextPlayerIndex() => 1,
-            $this->acrossPlayerIndex() => 2,
-            $this->prevPlayerIndex() => 3,
+            $this->nextPlayerIndex() => OpenFrom::LEFT,
+            $this->acrossPlayerIndex() => OpenFrom::ACROSS,
+            $this->prevPlayerIndex() => OpenFrom::RIGHT,
         };
         $action_player->open[] = $open;
     }
@@ -328,7 +328,7 @@ class Game
         $open = new OpenPais();
         $open->type = OpenType::CHII;
         $open->pais = [$last_river->pai, $components[0], $components[1]];
-        $open->from = 1;
+        $open->from = OpenFrom::LEFT;
         $action_player->open[] = $open;
     }
 
@@ -375,9 +375,9 @@ class Game
         $open->type = OpenType::KAN;
         $open->pais = array_fill(0, 4, $last_river->pai);
         $open->from = match ($player_index) {
-            $this->nextPlayerIndex() => 1,
-            $this->acrossPlayerIndex() => 2,
-            $this->prevPlayerIndex() => 3,
+            $this->nextPlayerIndex() => OpenFrom::LEFT,
+            $this->acrossPlayerIndex() => OpenFrom::ACROSS,
+            $this->prevPlayerIndex() => OpenFrom::RIGHT,
         };
         $action_player->open[] = $open;
     }
