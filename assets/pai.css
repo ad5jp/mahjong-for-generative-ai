@@ -214,3 +214,26 @@
     background-image: url(Z2.png);
     background-position: 100% 0;
 }
+
+/* リーチ棒 */
+.riichi-mark {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 10px;
+    margin: 5px;
+    background: #FFF;
+}
+.riichi-mark::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    border-radius: 50%;
+    background: #F00;
+}
