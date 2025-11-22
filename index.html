@@ -1,0 +1,148 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong</title>
+    <link rel="stylesheet" href="assets/pai.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {box-sizing: border-box;}
+        body {margin: 0;}
+        .table {position: relative; width: 100vw; height: 60vw; background: #080;}
+        .board {position: absolute; left: 20vw; top: 20vw; width: 60vw; height: 20vw; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .player {position: absolute; width: 60vw; height: 20vw; padding: 10px 30px;}
+        .player-0 {left: 20vw; top: 40vw;}
+        .player-1 {left: 60vw; top: 20vw; rotate: -90deg;}
+        .player-2 {left: 20vw; top: 0; rotate: 180deg;}
+        .player-3 {left: -20vw; top: 20vw; rotate: 90deg;}
+        .player h2 {width: 300px; margin: 0 auto 10px; text-align: center;}
+        .player-active h2 {border-bottom: 3px solid #A00;}
+        .comment {position: absolute; z-index: 2; top: -5vw; left: 0; right: 0; width: 50%; margin: 0 auto; padding: 15px; background: #FFF; border-radius: 10px;}
+        .comment::after {content: ""; position: absolute; bottom: -48px; right: 50%; border: 25px solid transparent; border-top: 25px solid #FFF;}
+        .alert {position: absolute; z-index: 3; left: 0; right: 0; top: 0; bottom: 0; width: 40%; height: 40%; margin: auto; display: flex; justify-content: center; align-items: center; background: #F00; color: #FFF;}
+        .console {padding: 30px; background: #DDD;}
+        label {display: block; width: 200px; padding: 0 5px; background: #FFF; border-radius: 5px 5px 0 0;}
+        textarea {display: block; width: 500px; height: 100px; margin-bottom: 20px; border: none; background: #F9F9F9;}
+        button {padding: 10px 40px;}
+    </style>
+</head>
+<body>
+<div id="app">
+    <main class="table">
+        <div v-if="alert" class="alert">
+            {{ alert }}
+        </div>
+
+        <div class="board">
+            <h1>{{ game.round_name }}</h1>
+
+            <div class="pais">
+                <span class="pai back"></span>
+                <span class="pai back"></span>
+                <span v-for="(pai, i) of game.dora" :key="i" class="pai" :class="pai"></span>
+                <span v-for="i in 5 - game.dora.length" :key="i" class="pai back"></span>
+            </div>
+        </div>
+
+        <div class="players">
+            <div v-for="(player, p) of game.players" :key="p" class="player" :class="[`player-${p}`, {'player-active': p === game.current_player}]">
+                <h2>
+                    {{ player.name }} <small v-if="p === game.current_player">(親)</small>
+                    <small>{{ player.score.toLocaleString() }}点</small>
+                    <strong v-if="player.riichi">[リーチ]</strong>
+                </h2>
+                <div class="pais">
+                    <span v-for="(river_pai, i) of player.river" :key="i" class="pai" :class="[river_pai.pai, {'riichi': river_pai.riichi, 'called': river_pai.called}]"></span>
+                </div>
+                <div class="pais">
+                    <div class="hand">
+                        <span v-for="(pai, i) of player.hand" :key="i" class="pai" :class="pai"></span>
+                        <div class="tsumo" v-if="player.drawing">
+                            <span class="pai" :class="player.drawing"></span>
+                        </div>
+                    </div>
+                    <div v-for="(open, o) of player.open" class="open" :class="[open.from, open.type]">
+                        <span v-for="(pai, i) of open.pais" :key="i" class="pai" :class="pai"></span>
+                    </div>
+                </div>
+                <div v-if="player.comment" class="comment">{{ player.comment }}</div>
+            </div>
+        </div>
+
+    </main>
+    <aside class="console">
+        <template v-for="prompt,i of prompts" :key="i">
+            <label>{{ prompt.name }} プロンプト</label>
+            <textarea v-model="prompt.content" readonly></textarea>
+        </template>
+
+        <form @submit.prevent="play">
+            <label>レスポンス</label>
+            <textarea v-model="action"></textarea>
+            <button type="submit">実行</button>
+        </form>
+        <div style="text-align:right">
+            <form action="" method="post"><input type="submit" name="reset" value="リセット"></form>
+        </div>
+    </aside>
+</div>
+</body>
+</html>
+
+
+<script>
+  const { createApp, ref, computed } = Vue
+
+  createApp({
+    setup() {
+        const game = ref({
+            round_name: '東1局',
+            dora: [],
+            players: [],
+        })
+
+        const prompts = ref([]);
+
+        const action = ref('{}');
+
+        const alert = ref(null);
+
+        const play = async () => {
+            const res = await fetch('/api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // body: '{"action": ' + action.value + '}'
+                body: JSON.stringify({ action: JSON.parse(action.value) })
+
+            });
+            const json = await res.json();
+
+            game.value = json.game;
+            prompts.value = json.prompts;
+            alert.value = json.alert;
+
+            if (game.value.state === 0) {
+                action.value = '{"command":"start"}';
+            } else if (game.value.state === 1) {
+                action.value = '{"command":"discard","target":"","riichi":false}';
+            } else if (game.value.state === 2) {
+                action.value = '{"command":"skip"}';
+            } else if (game.value.state === 3) {
+                action.value = '{"command":"calculate","points":[0,0,0,0]}';
+            }
+        }
+
+        play();
+
+        return {
+            game,
+            prompts,
+            action,
+            alert,
+            play
+        }
+    },
+  }).mount('#app')
+</script>

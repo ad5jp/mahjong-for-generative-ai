@@ -31,4 +31,25 @@ class Processor
     {
         unset($_SESSION['game']);
     }
+
+    public function makePrompts(Game $game): array
+    {
+        $prompts = [];
+
+        if ($game->state === Game::STATE_DISCARD) {
+            $prompts[] = [
+                'name' => $game->currentPlayer()->name,
+                'content' => $game->promptDiscard(),
+            ];
+        } elseif ($game->state === Game::STATE_CALL) {
+            foreach ([$game->nextPlayerIndex(), $game->acrossPlayerIndex(), $game->prevPlayerIndex()] as $i) {
+                $prompts[] = [
+                    'name' => $game->players[$i]->name,
+                    'content' => $game->promptCall($i),
+                ];
+            }
+        }
+
+        return $prompts;
+    }
 }
