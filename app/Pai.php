@@ -50,6 +50,64 @@ enum Pai: string
         return sprintf('<span class="pai %s"></span>', $this->value);
     }
 
+    public function isM(): bool
+    {
+        return in_array($this, [
+            self::M1,
+            self::M2,
+            self::M3,
+            self::M4,
+            self::M5,
+            self::M6,
+            self::M7,
+            self::M8,
+            self::M9,
+        ]);
+    }
+
+    public function isP(): bool
+    {
+        return in_array($this, [
+            self::P1,
+            self::P2,
+            self::P3,
+            self::P4,
+            self::P5,
+            self::P6,
+            self::P7,
+            self::P8,
+            self::P9,
+        ]);
+    }
+
+    public function isS(): bool
+    {
+        return in_array($this, [
+            self::S1,
+            self::S2,
+            self::S3,
+            self::S4,
+            self::S5,
+            self::S6,
+            self::S7,
+            self::S8,
+            self::S9,
+        ]);
+    }
+
+    public function isZ(): bool
+    {
+        return in_array($this, [
+            self::Z1,
+            self::Z2,
+            self::Z3,
+            self::Z4,
+            self::Z5,
+            self::Z6,
+            self::Z7,
+        ]);
+    }
+
     public function next(): self
     {
         return match($this) {
@@ -87,6 +145,46 @@ enum Pai: string
             self::Z5 => self::Z6,
             self::Z6 => self::Z7,
             self::Z7 => self::Z5,
+        };
+    }
+
+    public function number(): int
+    {
+        return match($this) {
+            self::M1 => 1,
+            self::M2 => 2,
+            self::M3 => 3,
+            self::M4 => 4,
+            self::M5 => 5,
+            self::M6 => 6,
+            self::M7 => 7,
+            self::M8 => 8,
+            self::M9 => 9,
+            self::P1 => 1,
+            self::P2 => 2,
+            self::P3 => 3,
+            self::P4 => 4,
+            self::P5 => 5,
+            self::P6 => 6,
+            self::P7 => 7,
+            self::P8 => 8,
+            self::P9 => 9,
+            self::S1 => 1,
+            self::S2 => 2,
+            self::S3 => 3,
+            self::S4 => 4,
+            self::S5 => 5,
+            self::S6 => 6,
+            self::S7 => 7,
+            self::S8 => 8,
+            self::S9 => 9,
+            self::Z1 => 0,
+            self::Z2 => 0,
+            self::Z3 => 0,
+            self::Z4 => 0,
+            self::Z5 => 0,
+            self::Z6 => 0,
+            self::Z7 => 0,
         };
     }
 

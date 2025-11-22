@@ -434,11 +434,32 @@ class Game
         $action_player->open[] = $open;
     }
 
-    private function doRon(int $player_index): void
+    public function canRon(int $player_index, bool $throw = false): bool
     {
         if ($player_index === $this->current_player) {
-            throw new Exception('自分の捨牌はロンできません！');
+            return $throw ? throw new Exception('自分の捨牌はロンできません！') : false;
         }
+
+        // 対象牌
+        /** @var RiverPai $last_river */
+        $last_river = end($this->currentPlayer()->river);
+
+        // 対象プレイヤー
+        $action_player = $this->players[$player_index];
+
+        // 手配＋対象牌
+        $hand = array_merge($action_player->hand, [$last_river]);
+
+        if (Finalize::verify($hand)) {
+            return true;
+        }
+
+        return $throw ? throw new Exception('ロンできる形ではありません') : false;
+    }
+
+    private function doRon(int $player_index): void
+    {
+        $this->canRon($player_index, true);
 
         // 対象牌
         /** @var RiverPai $last_river */
