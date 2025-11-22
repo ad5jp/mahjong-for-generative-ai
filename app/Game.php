@@ -237,10 +237,10 @@ class Game
         $this->current_player = $this->dealer_player;
     }
 
-    private function doPon(int $player_index): void
+    public function canPon(int $player_index, bool $throw = false): bool
     {
         if ($player_index === $this->current_player) {
-            throw new Exception('自分の捨牌はポンできません！');
+            return $throw ? throw new Exception('自分の捨牌はポンできません！') : false;
         }
 
         // 対象牌
@@ -252,14 +252,28 @@ class Game
 
         // リーチかかってないか確認
         if ($action_player->riichi) {
-            throw new Exception('リーチしているのでポンできません！');
+            return $throw ? throw new Exception('リーチしているのでポンできません！') : false;
         }
 
         // 手牌に2枚以上あるか確認
         $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $last_river->pai);
         if (count($same) < 2) {
-            throw new Exception('同じ牌を2枚以上持っていないので、ポンできません！');
+            return $throw ? throw new Exception('同じ牌を2枚以上持っていないので、ポンできません！') : false;
         }
+
+        return true;
+    }
+
+    private function doPon(int $player_index): void
+    {
+        $this->canPon($player_index, true);
+
+        // 対象牌
+        /** @var RiverPai $last_river */
+        $last_river = end($this->currentPlayer()->river);
+
+        // 対象プレイヤー
+        $action_player = $this->players[$player_index];
 
         // 手牌から2枚取り除く
         $count = 0;
@@ -292,13 +306,42 @@ class Game
     /**
      * @param array{0: Pai, 1:Pai} $components
      */
-    private function doChi(int $player_index, array $components): void
+    public function canChi(int $player_index, array $components, bool $throw = false): bool
     {
         $chiable_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
 
         if ($player_index !== $chiable_player) {
-            throw new Exception('打牌した人の下家しかチーできません');
+            return $throw ? throw new Exception('打牌した人の下家しかチーできません') : false;
         }
+
+        // 対象プレイヤー
+        $action_player = $this->players[$player_index];
+
+        // リーチかかってないか確認
+        if ($action_player->riichi) {
+            return $throw ? throw new Exception('リーチしているのでチーできません！') : false;
+        }
+
+        // 対象牌を手牌から取り除く
+        $first_index = array_search($components[0], $action_player->hand);
+        if ($first_index === false) {
+            return $throw ? throw new Exception($components[0]->value . 'が手牌にありません！') : false;
+        }
+
+        $second_index = array_search($components[1], $action_player->hand);
+        if ($second_index === false) {
+            return $throw ? throw new Exception($components[1]->value . 'が手牌にありません！') : false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array{0: Pai, 1:Pai} $components
+     */
+    private function doChi(int $player_index, array $components): void
+    {
+        $this->canChi($player_index, $components, true);
 
         // 対象牌
         /** @var RiverPai $last_river */
@@ -307,21 +350,10 @@ class Game
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
 
-        // リーチかかってないか確認
-        if ($action_player->riichi) {
-            throw new Exception('リーチしているのでチーできません！');
-        }
-
         // 対象牌を手牌から取り除く
         $first_index = array_search($components[0], $action_player->hand);
-        if ($first_index === false) {
-            throw new Exception($components[0]->value . 'が手牌にありません！');
-        }
         unset($action_player->hand[$first_index]);
         $second_index = array_search($components[1], $action_player->hand);
-        if ($second_index === false) {
-            throw new Exception($components[1]->value . 'が手牌にありません！');
-        }
         unset($action_player->hand[$second_index]);
         $action_player->hand = array_values($action_player->hand);
 
@@ -336,10 +368,10 @@ class Game
         $action_player->open[] = $open;
     }
 
-    private function doKan(int $player_index): void
+    public function canKan(int $player_index, bool $throw = false): bool
     {
         if ($player_index === $this->current_player) {
-            throw new Exception('自分の捨牌はカンできません！');
+            return $throw ? throw new Exception('自分の捨牌はカンできません！') : false;
         }
 
         // 対象牌
@@ -351,14 +383,28 @@ class Game
 
         // リーチかかってないか確認
         if ($action_player->riichi) {
-            throw new Exception('リーチしているのでカンできません！');
+            return $throw ? throw new Exception('リーチしているのでカンできません！') : false;
         }
 
-        // 手牌に3枚あるか確認
+        // 手牌に3枚以上あるか確認
         $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $last_river->pai);
         if (count($same) < 3) {
-            throw new Exception('同じ牌を3枚持っていないので、カンできません！');
+            return $throw ? throw new Exception('同じ牌を3枚持っていないので、カンできません！') : false;
         }
+
+        return true;
+    }
+
+    private function doKan(int $player_index): void
+    {
+        $this->canKan($player_index, true);
+
+        // 対象牌
+        /** @var RiverPai $last_river */
+        $last_river = end($this->currentPlayer()->river);
+
+        // 対象プレイヤー
+        $action_player = $this->players[$player_index];
 
         // 手牌から3枚取り除く
         $count = 0;
