@@ -246,7 +246,6 @@ class Game
         // 対象牌
         /** @var RiverPai $last_river */
         $last_river = end($this->currentPlayer()->river);
-        $last_river->called = true;
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -275,6 +274,9 @@ class Game
         }
         $action_player->hand = array_values($action_player->hand);
 
+        // 鳴かれた捨牌
+        $last_river->called = true;
+
         // 副露する
         $open = new OpenPais();
         $open->type = OpenType::PON;
@@ -301,7 +303,6 @@ class Game
         // 対象牌
         /** @var RiverPai $last_river */
         $last_river = end($this->currentPlayer()->river);
-        $last_river->called = true;
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -324,6 +325,9 @@ class Game
         unset($action_player->hand[$second_index]);
         $action_player->hand = array_values($action_player->hand);
 
+        // 鳴かれた捨牌
+        $last_river->called = true;
+
         // 副露する
         $open = new OpenPais();
         $open->type = OpenType::CHII;
@@ -341,7 +345,6 @@ class Game
         // 対象牌
         /** @var RiverPai $last_river */
         $last_river = end($this->currentPlayer()->river);
-        $last_river->called = true;
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -369,6 +372,9 @@ class Game
             }
         }
         $action_player->hand = array_values($action_player->hand);
+
+        // 鳴かれた捨牌
+        $last_river->called = true;
 
         // 副露する
         $open = new OpenPais();
