@@ -50,6 +50,46 @@ enum Pai: string
         return sprintf('<span class="pai %s"></span>', $this->value);
     }
 
+    public function next(): self
+    {
+        return match($this) {
+            self::M1 => self::M2,
+            self::M2 => self::M3,
+            self::M3 => self::M4,
+            self::M4 => self::M5,
+            self::M5 => self::M6,
+            self::M6 => self::M7,
+            self::M7 => self::M8,
+            self::M8 => self::M9,
+            self::M9 => self::M1,
+            self::P1 => self::P2,
+            self::P2 => self::P3,
+            self::P3 => self::P4,
+            self::P4 => self::P5,
+            self::P5 => self::P6,
+            self::P6 => self::P7,
+            self::P7 => self::P8,
+            self::P8 => self::P9,
+            self::P9 => self::P1,
+            self::S1 => self::S2,
+            self::S2 => self::S3,
+            self::S3 => self::S4,
+            self::S4 => self::S5,
+            self::S5 => self::S6,
+            self::S6 => self::S7,
+            self::S7 => self::S8,
+            self::S8 => self::S9,
+            self::S9 => self::S1,
+            self::Z1 => self::Z2,
+            self::Z2 => self::Z3,
+            self::Z3 => self::Z4,
+            self::Z4 => self::Z1,
+            self::Z5 => self::Z6,
+            self::Z6 => self::Z7,
+            self::Z7 => self::Z5,
+        };
+    }
+
     public function letter(): string
     {
         return match($this) {

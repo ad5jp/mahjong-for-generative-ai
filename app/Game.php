@@ -413,7 +413,7 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
-        $prompt .= 'ドラ指示牌: ' . join(' ', array_map(fn (Pai $pai) => $pai->value, $this->dora)) . "\n";
+        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->next()->letter(), $this->dora)) . "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;
@@ -467,7 +467,7 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
-        $prompt .= 'ドラ指示牌: ' . join(' ', array_map(fn (Pai $pai) => $pai->value, $this->dora)) . "\n";
+        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->next()->letter(), $this->dora)) . "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;
