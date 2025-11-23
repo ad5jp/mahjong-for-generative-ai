@@ -227,6 +227,7 @@ class Game
         foreach ($this->players as $index => $player) {
             $player->open = [];
             $player->river = [];
+            $player->drawing = null;
             $player->hand = array_splice($this->deck, 0, ($index === $this->dealer_player ? 14 : 13));
             $player->sortHand();
         }
