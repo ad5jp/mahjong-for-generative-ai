@@ -36,7 +36,7 @@
         </div>
 
         <div class="board">
-            <h1>{{ game.round_name }}</h1>
+            <h1>{{ round_name }}</h1>
 
             <div class="pais">
                 <span class="pai back"></span>
@@ -97,11 +97,18 @@
 
   createApp({
     setup() {
+        const directions = ['東', '南', '西', '北'];
+
         const game = ref({
-            round_name: '東1局',
             dora: [],
             players: [],
         })
+
+        const round_name = computed(() => {
+            const direction_index = Math.floor(game.value.round / 4);
+            const count = game.value.round % 4;
+            return `${directions[direction_index]}${count}局 (${game.value.round_chain}本場)`;
+        });
 
         const prompts = ref([]);
 
@@ -141,6 +148,7 @@
         play();
 
         return {
+            round_name,
             game,
             prompts,
             action,

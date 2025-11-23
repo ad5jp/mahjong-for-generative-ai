@@ -21,6 +21,8 @@ class Game
 
     public int $current_player = 0; // 手番 (players の index)
 
+    public int|null $won_player = null; // 上がったプレーヤー
+
     public int $state = 0; // プレイ状態 (0:対局準備中 1:捨て待ち 2:鳴き待ち 3:終局)
 
     public bool $after_kan = false; // 明槓後か（捨てた後、ドラをめくる）
@@ -180,10 +182,10 @@ class Game
                 $this->current_player = $action->player;
                 $this->state = self::STATE_DISCARD;
             } elseif ($action->command === Action::RON) {
-                // ロン実行
-                $this->doRon($action->player);
+                // ロン可否判定
+                $this->canRon($action->player, true);
                 // ロンしたプレイヤーをアクティブに
-                $this->current_player = $action->player;
+                $this->won_player = $action->player;
                 // 終局
                 $this->state = self::STATE_END;
             }
@@ -196,7 +198,7 @@ class Game
                 $this->players[3]->score += $action->points[3];
 
                 // 次局へ
-                if ($this->current_player === $this->dealer_player) {
+                if ($this->won_player === $this->dealer_player) {
                     // 連荘
                     $this->round_chain++;
                 } else {
@@ -205,6 +207,8 @@ class Game
                     $this->round_chain = 0;
                     $this->dealer_player = $this->dealer_player === 3 ? 0 : $this->dealer_player + 1;
                 }
+
+                $this->won_player = null;
                 $this->state = self::STATE_READY;
             }
         }
@@ -455,22 +459,6 @@ class Game
         }
 
         return $throw ? throw new Exception('ロンできる形ではありません') : false;
-    }
-
-    private function doRon(int $player_index): void
-    {
-        $this->canRon($player_index, true);
-
-        // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
-        $last_river->called = true;
-
-        // 対象プレイヤー
-        $action_player = $this->players[$player_index];
-
-        // 手牌に加える
-        $action_player->draw($last_river->pai);
     }
 
     public function promptDiscard(): string
