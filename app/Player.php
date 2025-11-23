@@ -10,6 +10,8 @@ class Player
 {
     public string $name;
 
+    public Agent $agent;
+
     public int $score;
 
     /**
@@ -33,9 +35,10 @@ class Player
 
     public string|null $comment = null; // コメント
 
-    public function __construct(string $name)
+    public function __construct(string $name, Agent $agent)
     {
         $this->name = $name;
+        $this->agent = $agent;
     }
 
     public function draw(Pai $pai)

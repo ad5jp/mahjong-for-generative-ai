@@ -242,6 +242,14 @@ class Game
         $this->current_player = $this->dealer_player;
     }
 
+    public function canCall(int $player_index): bool
+    {
+        return $this->canPon($player_index)
+            || $this->canChi($player_index, [null, null]) // TODO
+            || $this->canKan($player_index)
+            || $this->canRon($player_index);
+    }
+
     public function canPon(int $player_index, bool $throw = false): bool
     {
         if ($player_index === $this->current_player) {
@@ -453,7 +461,7 @@ class Game
         $action_player = $this->players[$player_index];
 
         // 手配＋対象牌
-        $hand = array_merge($action_player->hand, [$last_river]);
+        $hand = array_merge($action_player->hand, [$last_river->pai]);
 
         if (Finalize::verify($hand)) {
             return true;

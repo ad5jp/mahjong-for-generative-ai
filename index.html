@@ -15,7 +15,7 @@
         .player-1 {left: 60vw; top: 20vw; rotate: -90deg;}
         .player-2 {left: 20vw; top: 0; rotate: 180deg;}
         .player-3 {left: -20vw; top: 20vw; rotate: 90deg;}
-        .player h2 {width: 300px; margin: 0 auto 10px; text-align: center; color: #FFF;}
+        .player h2 {width: 300px; margin: 0 auto 10px; padding-bottom: 8px; text-align: center; color: #FFF;}
         .player h2 strong {font-size: 80%; color: #FF0; font-weight: normal;}
         .player h2 small {font-size: 60%; font-weight: normal;}
         .player-active h2 {padding-bottom: 5px; border-bottom: 3px solid #F44;}
@@ -44,6 +44,8 @@
                 <span v-for="(pai, i) of game.dora" :key="i" class="pai" :class="pai"></span>
                 <span v-for="i in 5 - game.dora.length" :key="i" class="pai back"></span>
             </div>
+
+            <button @click="play">GO</button>
         </div>
 
         <div class="players">

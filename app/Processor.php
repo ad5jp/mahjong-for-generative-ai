@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
-class Processor
+abstract class Processor
 {
     public function __construct()
     {
@@ -12,6 +12,8 @@ class Processor
         session_start();
         session_regenerate_id();
     }
+
+    abstract function proceed(Game $game, array $payload): void;
 
     public function load(callable $start_new_game): Game
     {
