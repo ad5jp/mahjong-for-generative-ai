@@ -245,7 +245,7 @@ class Game
     public function canCall(int $player_index): bool
     {
         return $this->canPon($player_index)
-            || $this->canChi($player_index, [null, null]) // TODO
+            || $this->canChi($player_index)
             || $this->canKan($player_index)
             || $this->canRon($player_index);
     }
@@ -316,10 +316,7 @@ class Game
         $action_player->open[] = $open;
     }
 
-    /**
-     * @param array{0: Pai, 1:Pai} $components
-     */
-    public function canChi(int $player_index, array $components, bool $throw = false): bool
+    public function canChi(int $player_index, bool $throw = false): bool
     {
         $chiable_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
 
@@ -335,18 +332,21 @@ class Game
             return $throw ? throw new Exception('リーチしているのでチーできません！') : false;
         }
 
-        // 対象牌を手牌から取り除く
-        $first_index = array_search($components[0], $action_player->hand);
-        if ($first_index === false) {
-            return $throw ? throw new Exception($components[0]->value . 'が手牌にありません！') : false;
+        // 対象牌
+        /** @var RiverPai $last_river */
+        $last_river = end($this->currentPlayer()->river);
+
+        // チー可能な牌があるか
+        $chiiables = $last_river->pai->chiiables();
+        foreach ($chiiables as $chiiable) {
+            $found_0 = array_search($chiiable[0], $action_player->hand);
+            $found_1 = array_search($chiiable[1], $action_player->hand);
+            if ($found_0 !== false && $found_1 !== false) {
+                return true;
+            }
         }
 
-        $second_index = array_search($components[1], $action_player->hand);
-        if ($second_index === false) {
-            return $throw ? throw new Exception($components[1]->value . 'が手牌にありません！') : false;
-        }
-
-        return true;
+        return $throw ? throw new Exception('チー可能な牌がありません！') : false;
     }
 
     /**
@@ -354,7 +354,7 @@ class Game
      */
     private function doChi(int $player_index, array $components): void
     {
-        $this->canChi($player_index, $components, true);
+        $this->canChi($player_index, true);
 
         // 対象牌
         /** @var RiverPai $last_river */
@@ -363,10 +363,24 @@ class Game
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
 
-        // 対象牌を手牌から取り除く
+        // チーの組合せ牌が正しいかチェック
+        $chiiables = $last_river->pai->chiiables();
+        if (count(array_filter($chiiables, function ($chiiable) use ($components) {
+            return ($chiiable[0] === $components[0] && $chiiable[1] === $components[1])
+                || ($chiiable[0] === $components[1] && $chiiable[1] === $components[0]);
+        })) === 0) {
+            throw new Exception('チーの組合せ牌が間違っています');
+        }
+
+        // 組合せ牌が手牌にあるかチェック
         $first_index = array_search($components[0], $action_player->hand);
-        unset($action_player->hand[$first_index]);
         $second_index = array_search($components[1], $action_player->hand);
+        if ($first_index === false || $second_index === false) {
+            throw new Exception('チーの組合せ牌が手にありません');
+        }
+
+        // 組合せ牌を手牌から取り除く
+        unset($action_player->hand[$first_index]);
         unset($action_player->hand[$second_index]);
         $action_player->hand = array_values($action_player->hand);
 
@@ -477,7 +491,7 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
-        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->next()->letter(), $this->dora)) . "\n";
+        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->forDora()->letter(), $this->dora)) . "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;
@@ -531,7 +545,7 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
-        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->next()->letter(), $this->dora)) . "\n";
+        $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->forDora()->letter(), $this->dora)) . "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;

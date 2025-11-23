@@ -29,10 +29,10 @@ class Finalize
 
         // 牌種ごとに分ける
         $chunked = [
-            'M' => array_values(array_filter($hand, fn (Pai $p) => $p->isM())),
-            'P' => array_values(array_filter($hand, fn (Pai $p) => $p->isP())),
-            'S' => array_values(array_filter($hand, fn (Pai $p) => $p->isS())),
-            'Z' => array_values(array_filter($hand, fn (Pai $p) => $p->isZ())),
+            'M' => array_values(array_filter($hand, fn (Pai $p) => $p->category() === 'M')),
+            'P' => array_values(array_filter($hand, fn (Pai $p) => $p->category() === 'P')),
+            'S' => array_values(array_filter($hand, fn (Pai $p) => $p->category() === 'S')),
+            'Z' => array_values(array_filter($hand, fn (Pai $p) => $p->category() === 'Z')),
         ];
 
         // 牌種ごとの枚数をチェック

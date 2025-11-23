@@ -50,102 +50,64 @@ enum Pai: string
         return sprintf('<span class="pai %s"></span>', $this->value);
     }
 
-    public function isM(): bool
+    public function next(): self|null
     {
-        return in_array($this, [
-            self::M1,
-            self::M2,
-            self::M3,
-            self::M4,
-            self::M5,
-            self::M6,
-            self::M7,
-            self::M8,
-            self::M9,
-        ]);
+        $category = $this->category();
+
+        if ($category === 'Z') {
+            return null;
+        }
+
+        $number = $this->number();
+
+        if ($number === 9) {
+            return null;
+        }
+
+        return self::from($category . ($number + 1));
     }
 
-    public function isP(): bool
+    public function prev(): self|null
     {
-        return in_array($this, [
-            self::P1,
-            self::P2,
-            self::P3,
-            self::P4,
-            self::P5,
-            self::P6,
-            self::P7,
-            self::P8,
-            self::P9,
-        ]);
+        $category = $this->category();
+
+        if ($category === 'Z') {
+            return null;
+        }
+
+        $number = $this->number();
+
+        if ($number === 1) {
+            return null;
+        }
+
+        return self::from($category . ($number - 1));
     }
 
-    public function isS(): bool
+    public function forDora(): self
     {
-        return in_array($this, [
-            self::S1,
-            self::S2,
-            self::S3,
-            self::S4,
-            self::S5,
-            self::S6,
-            self::S7,
-            self::S8,
-            self::S9,
-        ]);
+        $category = $this->category();
+
+        if ($category === 'Z') {
+            return match($this) {
+                self::Z1 => self::Z2,
+                self::Z2 => self::Z3,
+                self::Z3 => self::Z4,
+                self::Z4 => self::Z1,
+                self::Z5 => self::Z6,
+                self::Z6 => self::Z7,
+                self::Z7 => self::Z5,
+            };
+        }
+
+        $number = $this->number() === 9 ? 1 : $this->number() + 1;
+
+        return self::from($category . $number);
     }
 
-    public function isZ(): bool
+    public function category(): string
     {
-        return in_array($this, [
-            self::Z1,
-            self::Z2,
-            self::Z3,
-            self::Z4,
-            self::Z5,
-            self::Z6,
-            self::Z7,
-        ]);
-    }
-
-    public function next(): self
-    {
-        return match($this) {
-            self::M1 => self::M2,
-            self::M2 => self::M3,
-            self::M3 => self::M4,
-            self::M4 => self::M5,
-            self::M5 => self::M6,
-            self::M6 => self::M7,
-            self::M7 => self::M8,
-            self::M8 => self::M9,
-            self::M9 => self::M1,
-            self::P1 => self::P2,
-            self::P2 => self::P3,
-            self::P3 => self::P4,
-            self::P4 => self::P5,
-            self::P5 => self::P6,
-            self::P6 => self::P7,
-            self::P7 => self::P8,
-            self::P8 => self::P9,
-            self::P9 => self::P1,
-            self::S1 => self::S2,
-            self::S2 => self::S3,
-            self::S3 => self::S4,
-            self::S4 => self::S5,
-            self::S5 => self::S6,
-            self::S6 => self::S7,
-            self::S7 => self::S8,
-            self::S8 => self::S9,
-            self::S9 => self::S1,
-            self::Z1 => self::Z2,
-            self::Z2 => self::Z3,
-            self::Z3 => self::Z4,
-            self::Z4 => self::Z1,
-            self::Z5 => self::Z6,
-            self::Z6 => self::Z7,
-            self::Z7 => self::Z5,
-        };
+        return substr($this->value, 0, 1);
     }
 
     public function number(): int
@@ -226,6 +188,26 @@ enum Pai: string
             self::Z6 => '発',
             self::Z7 => '中',
         };
+    }
+
+    /**
+     * チーできる牌の組合せ
+     *
+     * @return array<int, array{0: self, 1:self}>
+     */
+    public function chiiables(): array
+    {
+        if ($this->category() === 'Z') {
+            return [];
+        }
+
+        $possibles = [
+            [$this->prev()?->prev(), $this->prev()],
+            [$this->prev(), $this->next()],
+            [$this->next(), $this->next()?->next()],
+        ];
+
+        return array_values(array_filter($possibles, fn ($possible) => $possible[0] && $possible[1]));
     }
 
     public static function fromLetter(string $letter): self
