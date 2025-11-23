@@ -12,9 +12,10 @@ $json = file_get_contents("php://input");
 
 $payload = $json ? (json_decode($json, true) ?: []) : [];
 
-// $processor = new ManualProcessor();
-$processor = new AutoProcessor();
-$processor->reset();
+$processor = new ManualProcessor();
+// $processor = new AutoProcessor();
+// $processor->reset();
+
 if (!empty($payload['reset'])) {
     $processor->reset();
 }

@@ -45,10 +45,12 @@ abstract class Processor
             ];
         } elseif ($game->state === Game::STATE_CALL) {
             foreach ([$game->nextPlayerIndex(), $game->acrossPlayerIndex(), $game->prevPlayerIndex()] as $i) {
-                $prompts[] = [
-                    'name' => $game->players[$i]->name,
-                    'content' => $game->promptCall($i),
-                ];
+                if ($game->canCall($i)) {
+                    $prompts[] = [
+                        'name' => $game->players[$i]->name,
+                        'content' => $game->promptCall($i),
+                    ];
+                }
             }
         }
 
