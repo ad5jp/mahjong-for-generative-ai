@@ -10,12 +10,32 @@ class LogicAgent implements Agent
     {
         $me = $game->currentPlayer();
 
+        // ツモできるならする
+        if ($me->canTsumo()) {
+            return new Action([
+                'command' => Action::TSUMO,
+            ]);
+        }
+
+        // 手牌にツモ牌を加える
         $hand = $me->hand;
         if ($me->drawing) {
             $hand[] = $me->drawing;
             usort($hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
         }
 
+        // 暗槓できるならする
+        $counts = array_count_values(array_map(fn (Pai $pai) => $pai->value, $hand));
+        foreach ($counts as $key => $count) {
+            if ($count === 4) {
+                return new Action([
+                    'command' => Action::ANKAN,
+                    'target' => Pai::from($key)->letter()
+                ]);
+            }
+        }
+
+        // 捨牌判定
         ($pai = $this->findSingleHonour($hand))
         || ($pai = $this->findSingleEdge($hand))
         || ($pai = $hand[0]);
@@ -81,7 +101,7 @@ class LogicAgent implements Agent
     {
         if ($game->canRon($my_player_index)) {
             return new Action(['command' => Action::RON, 'player' => $my_player_index]);
-        } elseif ($game->canPon($my_player_index)) {
+        } elseif ($game->canPon($my_player_index) && !$game->canKan($my_player_index)) {
             return new Action(['command' => Action::PON, 'player' => $my_player_index]);
         }
 

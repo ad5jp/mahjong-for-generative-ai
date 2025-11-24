@@ -36,8 +36,8 @@ class AutoProcessor extends Processor
                 || ($action = new Action(['command' => Action::SKIP]));
 
         } elseif ($game->state === Game::STATE_END) {
-
-
+            // TODO
+            $action = new Action(['command' => Action::CALCULATE, 'points' => [0, 0, 0, 0]]);
         }
 
         $game->play($action);

@@ -158,7 +158,7 @@ class Game
             } elseif ($action->command === Action::TSUMO) {
                 // 終局
                 $this->currentPlayer()->canTsumo(true);
-                $this->won_player = $action->player;
+                $this->won_player = $this->current_player;
                 $this->state = self::STATE_END;
             } elseif ($action->command === Action::ANKAN) {
                 $this->currentPlayer()->ankan($action->target);
