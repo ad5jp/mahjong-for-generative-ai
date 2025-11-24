@@ -250,6 +250,7 @@ class Game
             $player->open = [];
             $player->river = [];
             $player->drawing = null;
+            $player->riichi = false;
             $player->hand = array_splice($this->deck, 0, ($index === $this->dealer_player ? 14 : 13));
             $player->sortHand();
         }
@@ -622,29 +623,55 @@ class Game
             $this->prevPlayerIndex() => '下家',
         };
 
+        $target_pai = $this->lastRiver();
+
+        $can_ron = $this->canRon($player_index);
+        $can_pon = $this->canPon($player_index);
+        $can_kan = $this->canKan($player_index);
+        $can_chii = $this->canChi($player_index);
+
+        $calls = array_values(array_filter([
+            $can_ron ? 'ロン' : null,
+            $can_pon ? 'ポン' : null,
+            $can_kan ? 'カン' : null,
+            $can_chii ? 'チー' : null,
+        ]));
+
+        $direction = 'あなたは' . join('、', $calls) . 'を宣言することができます。' . "\n";
+        if (count($calls) === 1) {
+            $direction .= $calls[0] . 'を宣言するか、何もしないかを決めてください';
+        } else {
+            $direction .= join('、', $calls) . 'のいずれかを宣言するか、何もしないかを決めてください';
+        }
+
         // テキスト生成の便宜上、current_player を一時的に変える（あとで戻す）
         $buffer_current_player = $this->current_player;
         $this->current_player = $player_index;
 
         $prompt = '';
-        $prompt .= "あなたは麻雀の対局中です。状況は以下の通りで、{$discard_player_label}が打牌しました。ポン、カン、チー、ロンのいずれかを宣言するか、何もしないかを決めてください。" . "\n";
+        $prompt .= "あなたは麻雀の対局中です。状況は以下の通りで、{$discard_player_label}が「{$target_pai->letter()}」を打牌しました。" . "\n";
+        $prompt .= $direction . "\n";
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
         $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->forDora()->letter(), $this->dora)) . "\n";
+        $prompt .= "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;
         $prompt .= '副露牌: ' . $this->currentPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->currentPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 下家' . ($this->nextPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->nextPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->nextPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->nextPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 対面' . ($this->acrossPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->acrossPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->acrossPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->acrossPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 上家' . ($this->prevPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->prevPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->prevPlayer()->showOpen() . "\n" ;
@@ -652,18 +679,72 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 回答形式' . "\n";
         $prompt .= '以下のようなJSON形式で、回答のみを示して下さい。' . "\n";
+        $prompt .= "\n";
+        $prompt .= "## 何もしない場合";
         $prompt .= '```' . "\n";
         $prompt .= '{' . "\n";
         $prompt .= '    "player": ' . $player_index . ',' . "\n";
-        $prompt .= '    "command": "chii",' . "\n";
-        $prompt .= '    "components": ["1萬", "2萬"],' . "\n";
+        $prompt .= '    "command": "skip",' . "\n";
         $prompt .= '    "comment": ""' . "\n";
         $prompt .= '}' . "\n";
         $prompt .= '```' . "\n";
         $prompt .= 'player ... 固定値 ' . $player_index . "\n";
-        $prompt .= 'command ... pon: ポン, kan: カン, chii: チー, ron: ロン skip: 何もしない のいずれか' . "\n";
-        $prompt .= 'components ... チーの場合、組み合わせる牌' . "\n";
         $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+        $prompt .= "\n";
+        if ($can_ron) {
+            $prompt .= "## ロンを宣言する場合";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "player": ' . $player_index . ',' . "\n";
+            $prompt .= '    "command": "ron",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'player ... 固定値 ' . $player_index . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
+        if ($can_pon) {
+            $prompt .= "## ポンを宣言する場合";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "player": ' . $player_index . ',' . "\n";
+            $prompt .= '    "command": "pon",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'player ... 固定値 ' . $player_index . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
+        if ($can_kan) {
+            $prompt .= "## カンを宣言する場合";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "player": ' . $player_index . ',' . "\n";
+            $prompt .= '    "command": "kan",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'player ... 固定値 ' . $player_index . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
+        if ($can_chii) {
+            $prompt .= "## チーを宣言する場合";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "player": ' . $player_index . ',' . "\n";
+            $prompt .= '    "command": "chii",' . "\n";
+            $prompt .= '    "components": ["1萬", "2萬"],' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'player ... 固定値 ' . $player_index . "\n";
+            $prompt .= 'components ... 組み合わせる牌' . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
 
         $this->current_player = $buffer_current_player;
 

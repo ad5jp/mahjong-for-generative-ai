@@ -16,9 +16,11 @@
         .player-2 {left: 20vw; top: 0; rotate: 180deg;}
         .player-3 {left: -20vw; top: 20vw; rotate: 90deg;}
         .player h2 {width: 300px; margin: 0 auto 10px; padding-bottom: 8px; text-align: center; color: #FFF;}
-        .player h2 strong {font-size: 80%; color: #FF0; font-weight: normal;}
+        .player h2 strong {font-size: 80%; color: #F44; font-weight: normal;}
         .player h2 small {font-size: 60%; font-weight: normal;}
         .player-active h2 {padding-bottom: 5px; border-bottom: 3px solid #F44;}
+        .player-won {background: #FF0;}
+        .player-won h2 {color: #000}
         .comment {position: absolute; z-index: 2; top: -5vw; left: 0; right: 0; width: 50%; margin: 0 auto; padding: 15px; background: #FFF; border-radius: 10px;}
         .comment::after {content: ""; position: absolute; bottom: -48px; right: 50%; border: 25px solid transparent; border-top: 25px solid #FFF;}
         .alert {position: absolute; z-index: 3; left: 0; right: 0; top: 0; bottom: 0; width: 40%; height: 40%; margin: auto; display: flex; justify-content: center; align-items: center; background: #F00; color: #FFF;}
@@ -49,9 +51,10 @@
         </div>
 
         <div class="players">
-            <div v-for="(player, p) of game.players" :key="p" class="player" :class="[`player-${p}`, {'player-active': p === game.current_player}]">
+            <div v-for="(player, p) of game.players" :key="p" class="player" :class="[`player-${p}`, {'player-active': p === game.current_player, 'player-won': p === game.won_player}]">
                 <h2>
-                    {{ player.name }} <strong v-if="p === game.current_player">(親) </strong>
+                    <strong v-if="p === game.current_player">(親) </strong>
+                    {{ player.name }}
                     <small>{{ player.score.toLocaleString() }}点</small>
                     <i class="riichi-mark" v-if="player.riichi"></i>
                 </h2>
