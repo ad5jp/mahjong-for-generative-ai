@@ -101,6 +101,26 @@ class Game
         return $this->players[$this->prevPlayerIndex()];
     }
 
+    public function lastRiver(): Pai|null
+    {
+        $river = $this->currentPlayer()->river;
+        if (count($river) === 0) {
+            return null;
+        }
+
+        return $river[array_key_last($river)]->pai;
+    }
+
+    public function callLastRiver(): void
+    {
+        $river = $this->currentPlayer()->river;
+        if (count($river) === 0) {
+            return;
+        }
+
+        $river[array_key_last($river)]->called = true;
+    }
+
     public function play(Action $action): void
     {
         // TODO 流局処理
@@ -259,8 +279,7 @@ class Game
         }
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -271,7 +290,7 @@ class Game
         }
 
         // 手牌に2枚以上あるか確認
-        $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $last_river->pai);
+        $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $target_pai);
         if (count($same) < 2) {
             return $throw ? throw new Exception('同じ牌を2枚以上持っていないので、ポンできません！') : false;
         }
@@ -284,8 +303,7 @@ class Game
         $this->canPon($player_index, true);
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -293,7 +311,7 @@ class Game
         // 手牌から2枚取り除く
         $count = 0;
         foreach ($action_player->hand as $i => $pai) {
-            if ($pai === $last_river->pai) {
+            if ($pai === $target_pai) {
                 unset($action_player->hand[$i]);
                 $count++;
                 if ($count === 2) {
@@ -304,12 +322,12 @@ class Game
         $action_player->hand = array_values($action_player->hand);
 
         // 鳴かれた捨牌
-        $last_river->called = true;
+        $this->callLastRiver();
 
         // 副露する
         $open = new OpenPais();
         $open->type = OpenType::PON;
-        $open->pais = array_fill(0, 3, $last_river->pai);
+        $open->pais = array_fill(0, 3, $target_pai);
         $open->from = match ($player_index) {
             $this->nextPlayerIndex() => OpenFrom::LEFT,
             $this->acrossPlayerIndex() => OpenFrom::ACROSS,
@@ -335,11 +353,10 @@ class Game
         }
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // チー可能な牌があるか
-        $chiiables = $last_river->pai->chiiables();
+        $chiiables = $target_pai->chiiables();
         foreach ($chiiables as $chiiable) {
             $found_0 = array_search($chiiable[0], $action_player->hand);
             $found_1 = array_search($chiiable[1], $action_player->hand);
@@ -359,14 +376,13 @@ class Game
         $this->canChi($player_index, true);
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
 
         // チーの組合せ牌が正しいかチェック
-        $chiiables = $last_river->pai->chiiables();
+        $chiiables = $target_pai->chiiables();
         if (count(array_filter($chiiables, function ($chiiable) use ($components) {
             return ($chiiable[0] === $components[0] && $chiiable[1] === $components[1])
                 || ($chiiable[0] === $components[1] && $chiiable[1] === $components[0]);
@@ -387,12 +403,12 @@ class Game
         $action_player->hand = array_values($action_player->hand);
 
         // 鳴かれた捨牌
-        $last_river->called = true;
+        $this->callLastRiver();
 
         // 副露する
         $open = new OpenPais();
         $open->type = OpenType::CHII;
-        $open->pais = [$last_river->pai, $components[0], $components[1]];
+        $open->pais = [$target_pai, $components[0], $components[1]];
         $open->from = OpenFrom::LEFT;
         $action_player->open[] = $open;
     }
@@ -404,8 +420,7 @@ class Game
         }
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -416,7 +431,7 @@ class Game
         }
 
         // 手牌に3枚以上あるか確認
-        $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $last_river->pai);
+        $same = array_filter($action_player->hand, fn (Pai $pai) => $pai === $target_pai);
         if (count($same) < 3) {
             return $throw ? throw new Exception('同じ牌を3枚持っていないので、カンできません！') : false;
         }
@@ -429,8 +444,7 @@ class Game
         $this->canKan($player_index, true);
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
@@ -438,7 +452,7 @@ class Game
         // 手牌から3枚取り除く
         $count = 0;
         foreach ($action_player->hand as $i => $pai) {
-            if ($pai === $last_river->pai) {
+            if ($pai === $target_pai) {
                 unset($action_player->hand[$i]);
                 $count++;
                 if ($count === 3) {
@@ -449,12 +463,12 @@ class Game
         $action_player->hand = array_values($action_player->hand);
 
         // 鳴かれた捨牌
-        $last_river->called = true;
+        $this->callLastRiver();
 
         // 副露する
         $open = new OpenPais();
         $open->type = OpenType::KAN;
-        $open->pais = array_fill(0, 4, $last_river->pai);
+        $open->pais = array_fill(0, 4, $target_pai);
         $open->from = match ($player_index) {
             $this->nextPlayerIndex() => OpenFrom::LEFT,
             $this->acrossPlayerIndex() => OpenFrom::ACROSS,
@@ -470,14 +484,13 @@ class Game
         }
 
         // 対象牌
-        /** @var RiverPai $last_river */
-        $last_river = end($this->currentPlayer()->river);
+        $target_pai = $this->lastRiver();
 
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
 
         // 手配＋対象牌
-        $hand = array_merge($action_player->hand, [$last_river->pai]);
+        $hand = array_merge($action_player->hand, [$target_pai]);
 
         if (Finalize::verify($hand)) {
             return true;
@@ -488,25 +501,51 @@ class Game
 
     public function promptDiscard(): string
     {
+        $can_ankan = $this->currentPlayer()->canAnkan();
+        $can_kakan = $this->currentPlayer()->drawing && $this->currentPlayer()->canKakan($this->currentPlayer()->drawing);
+        $can_tsumo = $this->currentPlayer()->canTsumo();
+        $can_riichi = $this->currentPlayer()->canRiichi();
+
+        $calls = array_values(array_filter([
+            $can_ankan ? '暗槓' : null,
+            $can_kakan ? '加槓' : null,
+            $can_tsumo ? 'ツモ' : null,
+        ]));
+
+        $direction = "捨てる（打牌する）手牌を選択してください。";
+        if (count($calls) === 1) {
+            $direction = sprintf("捨てる（打牌する）手牌を選択するか、%sを宣言してください。", $calls[0]);
+        } elseif (count($calls) > 1) {
+            $direction = sprintf("捨てる（打牌する）手牌を選択するか、%sのいずれかを宣言してください。", join('、', $calls));
+        }
+
+
         $prompt = '';
-        $prompt .= 'あなたは麻雀の対局中です。状況は以下の通りで、あなたの手番です。手牌を捨てるか、暗槓、加槓、ツモのいずれかを宣言してください。' . "\n";
+        $prompt .= 'あなたは麻雀の対局中です。状況は以下の通りで、あなたの手番です。' . $direction . "\n";
         $prompt .= "\n";
         $prompt .= '# 場' . "\n";
         $prompt .= $this->showRound() . "\n";
         $prompt .= 'ドラ: ' . join(' ', array_map(fn (Pai $pai) => $pai->forDora()->letter(), $this->dora)) . "\n";
+        $prompt .= "\n";
         $prompt .= '## あなた' . ($this->current_player === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->currentPlayer()->score . "\n" ;
         $prompt .= '手牌: ' . $this->currentPlayer()->showHand() . "\n" ;
+        if ($this->currentPlayer()->drawing) {
+            $prompt .= 'ツモ牌: ' . $this->currentPlayer()->drawing->letter() . ' ※上記の手配にもツモ牌が含まれています。' . "\n";
+        }
         $prompt .= '副露牌: ' . $this->currentPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->currentPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 下家' . ($this->nextPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->nextPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->nextPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->nextPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 対面' . ($this->acrossPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->acrossPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->acrossPlayer()->showOpen() . "\n" ;
         $prompt .= '捨牌: ' . $this->acrossPlayer()->showRiver() . "\n" ;
+        $prompt .= "\n";
         $prompt .= '## 上家' . ($this->prevPlayerIndex() === $this->dealer_player ? '(親)' : '') . "\n";
         $prompt .= '得点: ' . $this->prevPlayer()->score . "\n" ;
         $prompt .= '副露牌: ' . $this->prevPlayer()->showOpen() . "\n" ;
@@ -514,18 +553,63 @@ class Game
         $prompt .= "\n";
         $prompt .= '# 回答形式' . "\n";
         $prompt .= '以下のようなJSON形式で、回答のみを示して下さい。' . "\n";
+        $prompt .= "\n";
+        if (count($calls) > 0) {
+            $prompt .= '## 打牌する場合' . "\n";
+        }
         $prompt .= '```' . "\n";
         $prompt .= '{' . "\n";
         $prompt .= '    "command": "discard",' . "\n";
-        $prompt .= '    "target": "' . $this->currentPlayer()->hand[0]->letter() . '",' . "\n";
-        $prompt .= '    "riichi": false,' . "\n";
+        $prompt .= '    "target": "' . ($this->currentPlayer()->drawing?->letter() ?? $this->currentPlayer()->hand[0]->letter()) . '",' . "\n";
+        if ($can_riichi) {
+            $prompt .= '    "riichi": false,' . "\n";
+        }
         $prompt .= '    "comment": ""' . "\n";
         $prompt .= '}' . "\n";
         $prompt .= '```' . "\n";
-        $prompt .= 'command ... discard: 打牌, ankan: 暗槓, kakan: 加槓, tsumo: ツモ のいずれか' . "\n";
-        $prompt .= 'target ... 打牌、暗槓、加槓 の場合の対象牌' . "\n";
-        $prompt .= 'riichi ... 打牌の場合、リーチするか否か' . "\n";
+        $prompt .= 'target ... 対象牌' . "\n";
+        if ($can_riichi) {
+            $prompt .= 'riichi ... リーチを宣言するか否か' . "\n";
+        }
         $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+        $prompt .= "\n";
+        if ($can_ankan) {
+            $prompt .= '## 暗槓する場合' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "command": "ankan",' . "\n";
+            $prompt .= '    "target": "' . ($this->currentPlayer()->drawing?->letter() ?? $this->currentPlayer()->hand[0]->letter()) . '",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'target ... 対象牌' . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
+        if ($can_kakan) {
+            $prompt .= '## 加槓する場合' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "command": "kakan",' . "\n";
+            $prompt .= '    "target": "' . $this->currentPlayer()->drawing->letter() . '",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'target ... 対象牌' . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
+        if ($can_tsumo) {
+            $prompt .= '## ツモを宣言する場合' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= '{' . "\n";
+            $prompt .= '    "command": "tsumo",' . "\n";
+            $prompt .= '    "comment": ""' . "\n";
+            $prompt .= '}' . "\n";
+            $prompt .= '```' . "\n";
+            $prompt .= 'comment ... 判断の理由 (50文字以内)' . "\n";
+            $prompt .= "\n";
+        }
 
         return $prompt;
     }

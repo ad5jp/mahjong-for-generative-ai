@@ -74,17 +74,42 @@ class Player
         $this->river[] = new RiverPai($target, $riichi);
     }
 
-    public function canAnkan(Pai $target_pai, bool $throw = false): bool
+    public function canRiichi(): bool
+    {
+        // TODO テンパイ形の判定もしたい
+
+        // 既にリーチしてたらNG
+        if ($this->riichi) {
+            return false;
+        }
+
+        // 鳴いてなければOK
+        if (empty($this->open)) {
+            return true;
+        }
+
+        // 副露牌があっても暗槓のみならOK
+        return count(array_filter($this->open, fn (OpenPais $open) => $open->type !== OpenType::ANKAN)) === 0;
+    }
+
+    public function canAnkan(Pai|null $target_pai = null, bool $throw = false): bool
     {
         $hand = $this->hand;
         if ($this->drawing) {
             $hand[] = $this->drawing;
         }
 
-        // 手牌に4枚あるか確認
-        $same = array_filter($this->hand, fn (Pai $pai) => $pai === $target_pai);
-        if (count($same) !== 4) {
-            return $throw ? throw new Exception('4枚持っていないので、カンできません！') : false;
+        if ($target_pai) {
+            // 牌が指定された場合、手牌に4枚あるか確認
+            $same = array_filter($this->hand, fn (Pai $pai) => $pai === $target_pai);
+            if (count($same) !== 4) {
+                return $throw ? throw new Exception($target_pai->letter() . 'を4枚持っていないので、カンできません！') : false;
+            }
+        } else {
+            // 未指定の場合、手配に何かしらが4枚あるか確認
+            if (max(array_count_values(array_map(fn (Pai $pai) => $pai->value, $hand))) < 4) {
+                return $throw ? throw new Exception('4枚持っている牌がないので、カンできません！') : false;
+            }
         }
 
         return true;
@@ -135,7 +160,9 @@ class Player
     public function canTsumo(bool $throw = false): bool
     {
         $hand = $this->hand;
-        $hand[] = $this->drawing;
+        if ($this->drawing) {
+            $hand[] = $this->drawing;
+        }
 
         if (!Finalize::verify($hand)) {
             return $throw ? throw new Exception('和了形ではないのでツモできません') : false;
@@ -157,9 +184,6 @@ class Player
             usort($hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
         }
         $string = join(' ', array_map(fn (Pai $pai) => $pai->letter(), $hand));
-        if ($this->drawing) {
-            $string .= sprintf(' (ツモ牌: %s)', $this->drawing->letter());
-        }
 
         return $string;
     }
