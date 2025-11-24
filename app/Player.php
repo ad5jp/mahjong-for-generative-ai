@@ -176,14 +176,45 @@ class Player
         usort($this->hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
     }
 
-    public function showHand()
+    /**
+     * ツモ牌も加えた手牌（ソート済）
+     *
+     * @return Pai[]
+     */
+    public function allHand(): array
     {
         $hand = $this->hand;
         if ($this->drawing) {
             $hand[] = $this->drawing;
             usort($hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
         }
-        $string = join(' ', array_map(fn (Pai $pai) => $pai->letter(), $hand));
+
+        return $hand;
+    }
+
+    /**
+     * 副露牌・ツモ牌も加えた手牌（ソート済）
+     *
+     * @return Pai[]
+     */
+    public function wholeHand()
+    {
+        $hand = $this->hand;
+        if ($this->drawing) {
+            $hand[] = $this->drawing;
+        }
+        foreach ($this->open as $open_pais) {
+            $hand = array_merge($hand, $open_pais->pais);
+        }
+
+        usort($hand, fn (Pai $a, Pai $b) => $a->value <=> $b->value);
+
+        return $hand;
+    }
+
+    public function showHand()
+    {
+        $string = join(' ', array_map(fn (Pai $pai) => $pai->letter(), $this->allHand()));
 
         return $string;
     }
