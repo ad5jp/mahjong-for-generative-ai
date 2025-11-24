@@ -74,18 +74,30 @@ class Player
         $this->river[] = new RiverPai($target, $riichi);
     }
 
-    public function ankan(Pai $target_pai): void
+    public function canAnkan(Pai $target_pai, bool $throw = false): bool
     {
-        // ツモ牌があれば手牌に統合
+        $hand = $this->hand;
         if ($this->drawing) {
-            $this->hand[] = $this->drawing;
-            $this->drawing = null;
+            $hand[] = $this->drawing;
         }
 
         // 手牌に4枚あるか確認
         $same = array_filter($this->hand, fn (Pai $pai) => $pai === $target_pai);
         if (count($same) !== 4) {
-            throw new Exception('4枚持っていないので、カンできません！');
+            return $throw ? throw new Exception('4枚持っていないので、カンできません！') : false;
+        }
+
+        return true;
+    }
+
+    public function ankan(Pai $target_pai): void
+    {
+        $this->canAnkan($target_pai, true);
+
+        // ツモ牌があれば手牌に統合
+        if ($this->drawing) {
+            $this->hand[] = $this->drawing;
+            $this->drawing = null;
         }
 
         // 手牌から全て取り除く
@@ -98,18 +110,38 @@ class Player
         $this->open[] = $open;
     }
 
-    public function kakan(Pai $target_pai): void
+    public function canKakan(Pai $target_pai, bool $throw = false): bool
     {
         // ポンしてるか確認
         $pon = array_find($this->open, fn (OpenPais $open) => $open->type === OpenType::PON && $open->pais[0] === $target_pai);
         if ($pon === null) {
-            throw new Exception('ポンしていないので、加槓できません');
+            return $throw ? throw new Exception('ポンしていないので、加槓できません') : false;
         }
 
+        return true;
+    }
+
+    public function kakan(Pai $target_pai): void
+    {
+        $this->canKakan($target_pai, true);
+
         // ポンにツモ牌を加えてカンにする
+        $pon = array_find($this->open, fn (OpenPais $open) => $open->type === OpenType::PON && $open->pais[0] === $target_pai);
         $pon->type = OpenType::KAKAN;
         $pon->pais[] = $this->drawing;
         $this->drawing = null;
+    }
+
+    public function canTsumo(bool $throw = false): bool
+    {
+        $hand = $this->hand;
+        $hand[] = $this->drawing;
+
+        if (!Finalize::verify($hand)) {
+            return $throw ? throw new Exception('和了形ではないのでツモできません') : false;
+        }
+
+        return true;
     }
 
     public function sortHand()
