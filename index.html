@@ -9,7 +9,9 @@
         * {box-sizing: border-box;}
         body {margin: 0;}
         .table {position: relative; width: 100vw; height: 60vw; background: #080;}
+        .table h1 {margin: 0 0 10px;}
         .board {position: absolute; left: 20vw; top: 20vw; width: 60vw; height: 20vw; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .finish {margin-bottom: 10px; padding: 5px 50px; background: #FF0;}
         .player {position: absolute; width: 60vw; height: 20vw; padding: 10px 30px;}
         .player-0 {left: 20vw; top: 40vw;}
         .player-1 {left: 60vw; top: 20vw; rotate: -90deg;}
@@ -47,13 +49,19 @@
                 <span v-for="i in 5 - game.dora.length" :key="i" class="pai back"></span>
             </div>
 
+            <div class="finish" v-if="game.state === 3">
+                <span v-if="game.exhausted">流局</span>
+                <span v-else-if="game.won_player === game.active_player">ツモ和了</span>
+                <span v-else>ロン和了</span>
+            </div>
+
             <button @click="play">GO</button>
         </div>
 
         <div class="players">
             <div v-for="(player, p) of game.players" :key="p" class="player" :class="[`player-${p}`, {'player-active': p === game.current_player, 'player-won': p === game.won_player}]">
                 <h2>
-                    <strong v-if="p === game.current_player">(親) </strong>
+                    <strong v-if="p === game.dealer_player">(親) </strong>
                     {{ player.name }}
                     <small>{{ player.score.toLocaleString() }}点</small>
                     <i class="riichi-mark" v-if="player.riichi"></i>
@@ -110,8 +118,8 @@
         })
 
         const round_name = computed(() => {
-            const direction_index = Math.floor(game.value.round / 4);
-            const count = game.value.round % 4;
+            const direction_index = Math.floor((game.value.round - 1) / 4);
+            const count = ((game.value.round - 1) % 4) + 1;
             return `${directions[direction_index]}${count}局 (${game.value.round_chain}本場)`;
         });
 

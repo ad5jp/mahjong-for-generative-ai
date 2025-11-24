@@ -21,7 +21,9 @@ class Game
 
     public int $current_player = 0; // 手番 (players の index)
 
-    public int|null $won_player = null; // 上がったプレーヤー
+    public int|null $won_player = null; // 上がったプレーヤー (players の index)
+
+    public bool $exhausted = false; // 流局
 
     public int $state = 0; // プレイ状態 (0:対局準備中 1:捨て待ち 2:鳴き待ち 3:終局)
 
@@ -175,12 +177,18 @@ class Game
             }
         } elseif ($this->state === self::STATE_CALL) {
             if ($action->command === Action::SKIP) {
-                // 次のプレイヤーの手番に
-                $this->current_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
-                // 山からツモる
-                $player = $this->currentPlayer();
-                $player->draw(array_shift($this->deck));
-                $this->state = self::STATE_DISCARD;
+                if (count($this->deck) === 0) {
+                    // 流局
+                    $this->state = self::STATE_END;
+                    $this->exhausted = true;
+                } else {
+                    // 次のプレイヤーの手番に
+                    $this->current_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
+                    // 山からツモる
+                    $player = $this->currentPlayer();
+                    $player->draw(array_shift($this->deck));
+                    $this->state = self::STATE_DISCARD;
+                }
             } elseif ($action->command === Action::PON) {
                 // ポン実行
                 $this->doPon($action->player);
@@ -231,6 +239,8 @@ class Game
                 }
 
                 $this->won_player = null;
+                $this->exhausted = false;
+                $this->after_kan = false;
                 $this->state = self::STATE_READY;
             }
         }
@@ -275,6 +285,10 @@ class Game
 
     public function canPon(int $player_index, bool $throw = false): bool
     {
+        if (count($this->deck) === 0) {
+            return $throw ? throw new Exception('河底牌はポンできません！') : false;
+        }
+
         if ($player_index === $this->current_player) {
             return $throw ? throw new Exception('自分の捨牌はポンできません！') : false;
         }
@@ -339,6 +353,10 @@ class Game
 
     public function canChi(int $player_index, bool $throw = false): bool
     {
+        if (count($this->deck) === 0) {
+            return $throw ? throw new Exception('河底牌はチーできません！') : false;
+        }
+
         $chiable_player = $this->current_player === 3 ? 0 : $this->current_player + 1;
 
         if ($player_index !== $chiable_player) {
@@ -416,6 +434,10 @@ class Game
 
     public function canKan(int $player_index, bool $throw = false): bool
     {
+        if (count($this->deck) === 0) {
+            return $throw ? throw new Exception('河底牌はカンできません！') : false;
+        }
+
         if ($player_index === $this->current_player) {
             return $throw ? throw new Exception('自分の捨牌はカンできません！') : false;
         }

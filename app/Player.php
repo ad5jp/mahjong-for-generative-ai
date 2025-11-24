@@ -101,7 +101,7 @@ class Player
 
         if ($target_pai) {
             // 牌が指定された場合、手牌に4枚あるか確認
-            $same = array_filter($this->hand, fn (Pai $pai) => $pai === $target_pai);
+            $same = array_filter($hand, fn (Pai $pai) => $pai === $target_pai);
             if (count($same) !== 4) {
                 return $throw ? throw new Exception($target_pai->letter() . 'を4枚持っていないので、カンできません！') : false;
             }
