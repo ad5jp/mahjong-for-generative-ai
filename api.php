@@ -1,31 +1,32 @@
 <?php
 
-use App\AutoProcessor;
+declare(strict_types=1);
+
 use App\Game;
-use App\LogicAgent;
-use App\ManualProcessor;
 use App\Player;
 
 require('vendor/autoload.php');
+
+$setting = include 'setting.php';
 
 $json = file_get_contents("php://input");
 
 $payload = $json ? (json_decode($json, true) ?: []) : [];
 
 // $processor = new ManualProcessor();
-$processor = new AutoProcessor();
+$processor = new $setting['processor']();
 // $processor->reset();
 
 if (!empty($payload['reset'])) {
     $processor->reset();
 }
 
-$game = $processor->load(function () {
+$game = $processor->load(function () use ($setting) {
     return new Game([
-        new Player('Chat GPT', new LogicAgent()),
-        new Player('Gemini', new LogicAgent()),
-        new Player('Copilot', new LogicAgent()),
-        new Player('Perplexity', new LogicAgent()),
+        new Player($setting['players'][0]['name'], new $setting['players'][0]['agent']()),
+        new Player($setting['players'][1]['name'], new $setting['players'][1]['agent']()),
+        new Player($setting['players'][2]['name'], new $setting['players'][2]['agent']()),
+        new Player($setting['players'][3]['name'], new $setting['players'][3]['agent']()),
     ]);
 });
 

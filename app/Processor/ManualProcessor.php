@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Processor;
+
+use App\Action;
+use App\Game;
 
 class ManualProcessor extends Processor
 {

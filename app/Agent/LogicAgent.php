@@ -2,7 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Agent;
+
+use App\Action;
+use App\Game;
+use App\OpenPais;
+use App\OpenType;
+use App\Pai;
+use App\Player;
 
 class LogicAgent implements Agent
 {

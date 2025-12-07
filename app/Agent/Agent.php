@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Agent;
+
+use App\Action;
+use App\Game;
 
 interface Agent
 {

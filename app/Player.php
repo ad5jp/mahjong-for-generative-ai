@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Agent\Agent;
 use Exception;
 
 class Player

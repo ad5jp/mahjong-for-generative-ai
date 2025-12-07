@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Processor;
+
+use App\Game;
 
 abstract class Processor
 {
