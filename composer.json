@@ -5,5 +5,8 @@
             "App\\": "app/"
         }
     },
-    "require": {}
+    "require": {
+        "guzzlehttp/guzzle": "^7.10",
+        "monolog/monolog": "^3.9"
+    }
 }

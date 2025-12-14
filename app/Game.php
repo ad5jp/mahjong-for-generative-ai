@@ -400,21 +400,7 @@ class Game
         // 対象プレイヤー
         $action_player = $this->players[$player_index];
 
-        // チーの組合せ牌が正しいかチェック
-        $chiiables = $target_pai->chiiables();
-        if (count(array_filter($chiiables, function ($chiiable) use ($components) {
-            return ($chiiable[0] === $components[0] && $chiiable[1] === $components[1])
-                || ($chiiable[0] === $components[1] && $chiiable[1] === $components[0]);
-        })) === 0) {
-            throw new Exception('チーの組合せ牌が間違っています');
-        }
-
-        // 組合せ牌が手牌にあるかチェック
-        $first_index = array_search($components[0], $action_player->hand);
-        $second_index = array_search($components[1], $action_player->hand);
-        if ($first_index === false || $second_index === false) {
-            throw new Exception('チーの組合せ牌が手にありません');
-        }
+        list($first_index, $second_index) = $this->findChiiablesInHand($target_pai, $components, $action_player->hand);
 
         // 組合せ牌を手牌から取り除く
         unset($action_player->hand[$first_index]);
@@ -430,6 +416,39 @@ class Game
         $open->pais = [$target_pai, $components[0], $components[1]];
         $open->from = OpenFrom::LEFT;
         $action_player->open[] = $open;
+    }
+
+    /**
+     * @param array{0: Pai, 1:Pai} $components
+     * @param Pai[] $hand
+     * @return array{0: int, 1:int}
+     */
+    private function findChiiablesInHand(Pai $target_pai, array $components, array $hand): array
+    {
+        // 指定されたチーの組合せ牌が正しいかチェック
+        $chiiables = $target_pai->chiiables();
+        if (count(array_filter($chiiables, function ($chiiable) use ($components) {
+            return ($chiiable[0] === $components[0] && $chiiable[1] === $components[1])
+                || ($chiiable[0] === $components[1] && $chiiable[1] === $components[0]);
+        })) > 0) {
+            // 組合せ牌が手牌にあるかチェック
+            $first_index = array_search($components[0], $hand);
+            $second_index = array_search($components[1], $hand);
+            if ($first_index !== false && $second_index !== false) {
+                return [$first_index, $second_index];
+            }
+        }
+
+        // NGなら、手配にあるチー組合せ牌を強制指定
+        foreach ($chiiables as $chiiable) {
+            $first_index = array_search($chiiable[0], $hand);
+            $second_index = array_search($chiiable[1], $hand);
+            if ($first_index !== false && $second_index !== false) {
+                return [$first_index, $second_index];
+            }
+        }
+
+        throw new Exception('チーできる牌がありません');
     }
 
     public function canKan(int $player_index, bool $throw = false): bool

@@ -55,7 +55,7 @@
                 <span v-else>ロン和了</span>
             </div>
 
-            <button @click="play">GO</button>
+            <button @click="go" :disabled="loading">GO</button>
         </div>
 
         <div class="players">
@@ -97,7 +97,7 @@
             <button type="submit">実行</button>
         </form>
         <div style="text-align:right">
-            <form action="" method="post"><input type="submit" name="reset" value="リセット"></form>
+            <form @submit.prevent="reset"><input type="submit" name="reset" value="リセット"></form>
         </div>
     </aside>
 </div>
@@ -129,7 +129,11 @@
 
         const alert = ref(null);
 
+        const loading = ref(false);
+
         const play = async () => {
+            loading.value = true;
+
             const res = await fetch('/api.php', {
                 method: 'POST',
                 headers: {
@@ -137,6 +141,40 @@
                 },
                 // body: '{"action": ' + action.value + '}'
                 body: JSON.stringify({ action: JSON.parse(action.value) })
+
+            });
+            const json = await res.json();
+
+            game.value = json.game;
+            prompts.value = json.prompts;
+            alert.value = json.alert;
+            loading.value = false;
+
+            if (game.value.state === 0) {
+                action.value = '{"command":"start"}';
+            } else if (game.value.state === 1) {
+                action.value = '{"command":"discard","target":"","riichi":false}';
+            } else if (game.value.state === 2) {
+                action.value = '{"command":"skip"}';
+            } else if (game.value.state === 3) {
+                action.value = '{"command":"calculate","points":[0,0,0,0]}';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+
+        const go = async () => {
+            action.value = JSON.stringify({auto: 1});
+            await play();
+        }
+
+        const reset = async () => {
+            const res = await fetch('/api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mode: 'reset' })
 
             });
             const json = await res.json();
@@ -166,7 +204,10 @@
             prompts,
             action,
             alert,
-            play
+            loading,
+            play,
+            go,
+            reset
         }
     },
   }).mount('#app')

@@ -4,21 +4,26 @@ declare(strict_types=1);
 
 use App\Game;
 use App\Player;
+use App\Processor\Processor;
 
 require('vendor/autoload.php');
 
-$setting = include 'setting.php';
+require('config.php');
+
+$setting = include('setting.php');
 
 $json = file_get_contents("php://input");
 
 $payload = $json ? (json_decode($json, true) ?: []) : [];
 
-// $processor = new ManualProcessor();
+/** @var Processor $processor */
 $processor = new $setting['processor']();
 // $processor->reset();
 
-if (!empty($payload['reset'])) {
-    $processor->reset();
+if (!empty($payload['mode'])) {
+    if ($payload['mode'] === 'reset') {
+        $processor->reset();
+    }
 }
 
 $game = $processor->load(function () use ($setting) {

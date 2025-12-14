@@ -11,6 +11,10 @@ class AutoProcessor extends Processor
 {
     public function proceed(Game $game, array $payload): void
     {
+        if (empty($payload['action']['auto'])) {
+            return;
+        }
+
         if ($game->state === Game::STATE_READY) {
             $action = new Action(['command' => Action::START]);
 
